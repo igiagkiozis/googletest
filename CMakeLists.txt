@@ -7,9 +7,16 @@ if (NOT TARGET googletest)
 
 	include(ExternalProject)
 
+	if(CMAKE_C_COMPILER)
+		set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+	endif()
+	if(CMAKE_CXX_COMPILER)
+		set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+	endif()
+
 	ExternalProject_Add(googletest
-		GIT_REPOSITORY https://github.com/google/googletest.git
-		GIT_TAG release-1.8.0
+		URL https://github.com/google/googletest/archive/5490beb0602eab560fa3969a4410e11d94bf12af.zip
+		URL_HASH SHA256=fb94ea2c653f239fb57e423afef372ebb5e019418af58f8bb2ce946679a6187b
 		CMAKE_ARGS
 			# This does not work on MSVC, but is useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
@@ -17,6 +24,11 @@ if (NOT TARGET googletest)
 			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
 			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
 			-Dgtest_force_shared_crt=ON
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
 		# Disable the update step.
 		UPDATE_COMMAND ""
 		# Disable the install step.
